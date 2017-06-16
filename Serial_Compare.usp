@@ -1,0 +1,33 @@
+/*
+#HELP_BEGIN
+   Comare 2 Serial Strings. If they are the same, equal will be set to set to HIGH otherwise it will be set to LOW.
+#HELP_END
+*/
+
+#SYMBOL_NAME "Serial Compare"
+#CATEGORY "10" // Serial
+#DEFAULT_VOLATILE
+#ENCODING_ASCII
+
+STRING_INPUT str1$[255], str2$[255];
+
+DIGITAL_OUTPUT equal;
+
+STRING comp_str1[255], comp_str2[255];
+
+CHANGE str1$, str2$ {
+    comp_str1 = str1$;
+    comp_str2 = str2$;
+
+    IF(comp_str1 <> comp_str2) {
+    	    equal = 0;
+    } ELSE {
+	        equal = 1;
+    }
+}
+
+Function Main() {
+    equal = 0;
+    str1$ = "";
+    str2$ = "";
+}
