@@ -1,4 +1,12 @@
 /*
+Dealer Name: New York Technology Co.
+System Name: 
+System Number:
+Programmer: Tim Donahue
+Comments: Copyright (c) 2017 New York Technology Co. <info@nytechco.com>, All rights reserverd.
+*/
+
+/*
 #HELP_BEGIN
    Comare 2 Serial Strings. If they are the same, equal will be set to set to HIGH otherwise it will be set to LOW.
 #HELP_END
