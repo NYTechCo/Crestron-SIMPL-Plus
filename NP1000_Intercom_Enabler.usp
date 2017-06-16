@@ -1,0 +1,143 @@
+/*******************************************************************************************
+  SIMPL+ Module Information
+  (Fill in comments below)
+*******************************************************************************************/
+/*
+Dealer Name: Donahue Technology, LLC.
+System Name: 
+System Number:
+Programmer: Tim Donahue
+Comments: Copyright (c) 2017 Timothy Donahue <tdonahue@donahuetechnology.com>, All rights reserverd.
+*/
+
+/*******************************************************************************************
+  Compiler Directives
+*******************************************************************************************/
+
+#SYMBOL_NAME "NP1000 Intercom Toggle"
+#HINT "Updates dial string with the NP1000 Intercom code based on status of the icom_enable input."
+// #CATEGORY "NP1000" 
+#DEFAULT_VOLATILE
+#ENABLE_STACK_CHECKING
+#ENABLE_TRACE
+#ENCODING_ASCII
+
+#HELP_BEGIN
+Updates dial string with the NP1000 Intercom code based on status of the icom_enable input.
+#HELP_END
+
+/*******************************************************************************************
+  Include Libraries
+  (Uncomment and include additional libraries as needed)
+*******************************************************************************************/
+// #CRESTRON_LIBRARY ""
+// #USER_LIBRARY ""
+
+
+#DEFINE_CONSTANT ICOM_DISABLED 0
+#DEFINE_CONSTANT ICOM_ENABLED 1
+
+/*******************************************************************************************
+  DIGITAL, ANALOG and SERIAL INPUTS and OUTPUTS
+  (Uncomment and declare inputs and outputs as needed)
+*******************************************************************************************/
+DIGITAL_INPUT icom_enable;
+BUFFER_INPUT dial_string[255];
+
+STRING_OUTPUT dial_string_out;
+DIGITAL_OUTPUT fb_intercom_enable;
+
+
+INTEGER icom_enable_status, nextChar;
+STRING buf_out[255], icom_prefix[10], dial_prefix[10];
+
+/********************************
+ * Event Handlers
+ ********************************/
+
+/*
+ * Input: icom_enable
+ * Events: PUSH, RELEASE
+ * 
+ * Description: Enable or disable the "*" prefix for the NP1000 intercom functionality.
+ *
+ */
+PUSH icom_enable
+{
+    icom_enable_status = ICOM_ENABLED;
+    fb_intercom_enable = ICOM_ENABLED;
+    dial_prefix = icom_prefix;
+}
+
+RELEASE icom_enable
+{
+    icom_enable_status = ICOM_DISABLED;
+    fb_intercom_enable = ICOM_DISABLED;
+    dial_prefix = "";
+}
+
+/*
+ * Input: dial_string
+ * Events: CHANGE
+ * 
+ * Description: Process the incoming serial buffer for an extension then apply
+ *              the intercom current value of dial_prefix and send to dial_string_out
+ *
+ */
+CHANGE dial_string
+{
+    while (len(dial_string) >= 1)
+    {
+
+        nextChar = getc(dial_string);        
+        if (nextChar = 0x0D)
+        {
+            dial_string_out = dial_prefix + buf_out;
+            print("Extension received!!!\r\n");
+            print("Dialing: %s\r\n", buf_out);
+            if (icom_enable_status = 0) {
+                print("Intercom is disabled.\r\n");
+            } else {
+                print("Intercom is enabled.\r\n");
+            }
+            buf_out = "";
+
+        } else {
+            
+            buf_out = buf_out + chr(nextChar);
+        }
+
+        
+            
+
+    } 
+}
+
+/*******************************************************************************************
+  Main()
+  Uncomment and place one-time startup code here
+  (This code will get called when the system starts up)
+*******************************************************************************************/
+Function Main()
+{ 
+    // Define initial state of global variables
+    buf_out = "";
+    // icom_prefix = "*";
+    icom_prefix = "87";
+    nextChar = 0;
+
+
+    // Set state based on status of icom_enable
+    if (icom_enable = 1) {          
+        icom_enable_status = ICOM_ENABLED;
+        fb_intercom_enable = ICOM_ENABLED;
+        dial_prefix = icom_prefix;
+    } else if (icom_enable = 0) {
+        icom_enable_status = ICOM_DISABLED;
+        fb_intercom_enable = ICOM_DISABLED;
+        dial_prefix = "";
+    }
+
+        
+}
+
